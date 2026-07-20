@@ -8,11 +8,11 @@
 #include <sys/select.h>
 #include <sys/ioctl.h>
 
-#define CYCLE_HISTORY 3
+#define CYCLE_HISTORY 5
 #define DELAY_US      500e3
 
-#define ON_CHARACTER "#"
-//#define ON_CHARACTER  "\xe2\x96\x88"
+//#define ON_CHARACTER "#"
+#define ON_CHARACTER  "\xe2\x96\x88"
 
 typedef struct {
 	size_t width;
