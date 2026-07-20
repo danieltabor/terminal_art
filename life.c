@@ -274,9 +274,9 @@ int main(int argc, char** argv) {
 				if( rgb&1 && (totals[0]==2 || totals[0] == 4) ) { next_cells[i] |= 1; }
 				if( !(rgb&1) && (totals[0]==2 || totals[0] == 3) ) { next_cells[i] |= 1; }
 				if( rgb&2 && (totals[1]==2 || totals[1] == 4) ) { next_cells[i] |= 2; }
-				if( !(rgb&2) && (totals[0]==2 || totals[0] == 3)  ) { next_cells[i] |= 2; }
+				if( !(rgb&2) && (totals[1]==2 || totals[1] == 3)  ) { next_cells[i] |= 2; }
 				if( rgb&4 && (totals[2]==2 || totals[2] == 4) ) { next_cells[i] |= 4; }
-				if( !(rgb&4) && (totals[0]==2 || totals[0] == 3)  ) { next_cells[i] |= 4; }
+				if( !(rgb&4) && (totals[2]==2 || totals[2] == 3)  ) { next_cells[i] |= 4; }
 
 				for( j=0; j<cycle_history; j++ ) {
 					if( next_cells[i] == hist_cells[(j*cell_count)+i] ) { break; }
