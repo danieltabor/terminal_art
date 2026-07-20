@@ -8,11 +8,11 @@
 #include <sys/select.h>
 #include <sys/ioctl.h>
 
-#define CYCLE_HISTORY 7
-#define DELAY_US      100e3
+#define CYCLE_HISTORY 3
+#define DELAY_US      500e3
 
-//#define ON_CHARACTER "#"
-#define ON_CHARACTER  "\xe2\x96\x88"
+#define ON_CHARACTER "#"
+//#define ON_CHARACTER  "\xe2\x96\x88"
 
 typedef struct {
 	size_t width;
@@ -73,6 +73,7 @@ static int user_reset(void) {
 
 int main(void) {
 	size_t i,j;
+	size_t x,y;
 	int total;
 	termsize_t term;
 	uint8_t *hist_cells[CYCLE_HISTORY];
@@ -85,33 +86,44 @@ int main(void) {
 	for(;;) {
 		if( term.updated || !gen_diff || user_reset() ) {
 			for( j=0; j<CYCLE_HISTORY; j++ ) {
-				hist_cells[j] = (uint8_t*)realloc(hist_cells[j],term.width);
+				hist_cells[j] = (uint8_t*)realloc(hist_cells[j],term.width*term.height);
 			}
-			next_cells = (uint8_t*)realloc(next_cells,term.width);
+			next_cells = (uint8_t*)realloc(next_cells,term.width*term.height);
 			srandom((unsigned int)time(0));
-			for( i=0; i<term.width; i++ ) {
+			for( i=0; i<(term.width*term.height); i++ ) {
 				for( j=0; j<CYCLE_HISTORY; j++ ) {
 					hist_cells[j][i] = 0;
 				}
 				next_cells[i] = (random()&1);
 			}
 		}
-		for( i=0; i<term.width; i++ ) {
+		for( i=0; i<(term.width*term.height); i++ ) {
 			for( j=1; j<CYCLE_HISTORY; j++ ) {
 				hist_cells[j][i] = hist_cells[j-1][i];
 			}
 			hist_cells[0][i] = next_cells[i];
 			next_cells[i] = 0;
 		}
+		printf("\x1b[H");
 		gen_diff = 0;
-		for( i=0; i<term.width; i++ ) {
+		for( i=0; i<(term.width*term.height); i++ ) {
+			y = i/term.width;
+			x = i%term.width;
 			total = 0;
-			if( i >= 2 ) { total += hist_cells[0][i-2]; }
-			if( i >= 1 ) { total += hist_cells[0][i-1]; }
-			if( i <= term.width-2 ) { total += hist_cells[0][i+1]; }
-			if( i <= term.width-1 ) { total += hist_cells[0][i+2]; }
-			if( !hist_cells[0][i] && (total == 2 || total == 3) ) { next_cells[i] = 1; }
-			if( hist_cells[0][i] && (total == 2 || total == 4) ) { next_cells[i] = 1; }
+			if( y > 0 ) {
+				if( x > 0 ) { total += hist_cells[0][i-term.width-1]; }
+				total += hist_cells[0][i-term.width];
+				if( x < (term.width-1) ) { total += hist_cells[0][i-term.width+1]; }
+			}
+			if( x > 0 ) { total += hist_cells[0][i-1]; }
+			if( x < (term.width-1) ) { total += hist_cells[0][i+1]; }
+			if( y < (term.height-1) ) {
+				if( x > 0 ) { total += hist_cells[0][i+term.width-1]; }
+				total += hist_cells[0][i+term.width];
+				if( x < (term.width-1) ) { total += hist_cells[0][i+term.width+1]; }
+			}
+			if( hist_cells[0][i] && (total == 2 || total == 3) ) { next_cells[i] = 1; }
+			if( !hist_cells[0][i] && total == 3 ) { next_cells[i] = 1; }
 			
 			for( j=0; j<CYCLE_HISTORY; j++ ) {
 				if( next_cells[i] == hist_cells[j][i] ) { break; }
