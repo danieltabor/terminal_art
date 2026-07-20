@@ -1,13 +1,11 @@
-all: island 1d-life 2d-life
+all: island life
 
 island: island.c
 	$(CC) -o $@ $^ -static
 
-1d-life: 1d-life.c
-	$(CC) -o $@ $^ -static
-
-2d-life: 2d-life.c
-	$(CC) -o $@ $^ -static
+life: life.c
+	$(CC) -g -o $@ $^ -static
 
 clean:
 	rm -f island
+	rm -f life
